@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+}
+
+group = 'me.konsolas.aac'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    mavenCentral()
+    maven {
+        url = 'http://dpp.dpnw.site:8081/repository/maven-public/'
+        allowInsecureProtocol = true
+    }
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:23.0.0'
+
+    compileOnly 'org.spigotmc:spigot-api:R0.1:1.19'
+    compileOnly 'org.bukkit.craftbukkit:craftbukkit:R0.1:1.19'
+
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
